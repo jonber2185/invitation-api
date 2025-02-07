@@ -17,13 +17,16 @@ function asyncHandler(handler) {
 
 PostsRouter.route('/')
   .get(asyncHandler(async (req, res) => {
-    const limit = Number(req.query["limit"]) || 0;
-    const offset = Number(req.query["offset"]) || 0
+    const page = Number(req.query["page"]) || 0
+    const limit = Number(req.query["limit"]) || 3;
+
     const totalCount = await Posts.countDocuments();
+    const offset = page * limit;
     const hasMore = offset + limit < totalCount;
 
     const posts = await Posts.find().sort({ createdAt: 'desc' }).skip(offset).limit(limit);
-    res.status(200).json({ totalCount, hasMore, posts });
+    res.status(200).json({ 
+      totalCount, page, hasMore, posts });
   }))
   .post(asyncHandler(async (req, res) => {
     const newPost = await Posts.create(req.body);
